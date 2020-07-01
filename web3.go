@@ -45,6 +45,10 @@ func (w *Web3) BalanceOf(address string) (balance big.Int, err error) {
 	return w.Rpc.EthGetBalance(address, "latest")
 }
 
+func (w *Web3) NonceOf(address string) (balance int, err error) {
+	return w.Rpc.EthGetTransactionCount(address, "latest")
+}
+
 // todo: new block channel
 
 // ============= Contract =============
@@ -79,7 +83,11 @@ type SendTxParams struct {
 }
 
 func (c *Contract) Call(functionName string, args ...interface{}) (resp string, err error) {
-	return c.HistoryCall("latest", functionName, args)
+	if args != nil {
+		return c.HistoryCall("latest", functionName, args)
+	} else {
+		return c.HistoryCall("latest", functionName)
+	}
 }
 
 func (c *Contract) HistoryCall(blockNum string, functionName string, args ...interface{}) (resp string, err error) {
@@ -137,7 +145,7 @@ func (w *Web3) TransferEth(params *SendTxParams, to string, value *big.Int) (res
 	return w.Rpc.EthSendRawTransaction(rawData)
 }
 
-func (w *Web3) GetRecipt(txHash string) (recipt *helper.TransactionReceipt, err error) {
+func (w *Web3) GetRecipt(txHash string) (receipt *helper.TransactionReceipt, err error) {
 	return w.Rpc.EthGetTransactionReceipt(txHash)
 }
 
