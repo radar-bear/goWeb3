@@ -1,4 +1,4 @@
-module goWeb3
+module github.com/radar-bear/goWeb3
 
 go 1.14
 
