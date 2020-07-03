@@ -83,11 +83,7 @@ type SendTxParams struct {
 }
 
 func (c *Contract) Call(functionName string, args ...interface{}) (resp string, err error) {
-	if args != nil {
-		return c.HistoryCall("latest", functionName, args)
-	} else {
-		return c.HistoryCall("latest", functionName)
-	}
+	return c.HistoryCall("latest", functionName, args...)
 }
 
 func (c *Contract) HistoryCall(blockNum string, functionName string, args ...interface{}) (resp string, err error) {
@@ -178,4 +174,8 @@ func GetChainId() (chainId string) {
 		logrus.Fatalf("%s network not support", network)
 	}
 	return "0"
+}
+
+func HexToAddress(hexString string) common.Address {
+	return common.HexToAddress(hexString)
 }
