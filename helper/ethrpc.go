@@ -4,10 +4,8 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"math/big"
-	"net/http"
 	"os"
 )
 
@@ -37,18 +35,16 @@ type ethRequest struct {
 
 // EthRPC - Ethereum Rpc client
 type EthRPC struct {
-	url    string
-	client httpClient
-	log    logger
-	Debug  bool
+	url   string
+	log   logger
+	Debug bool
 }
 
 // New create new Rpc client with given url
 func New(url string, options ...func(rpc *EthRPC)) *EthRPC {
 	rpc := &EthRPC{
-		url:    url,
-		client: http.DefaultClient,
-		log:    log.New(os.Stderr, "", log.LstdFlags),
+		url: url,
+		log: log.New(os.Stderr, "", log.LstdFlags),
 	}
 	for _, option := range options {
 		option(rpc)
@@ -94,33 +90,27 @@ func (rpc *EthRPC) Call(method string, params ...interface{}) (json.RawMessage, 
 		return nil, err
 	}
 
-	response, err := rpc.client.Post(rpc.url, "application/json", bytes.NewBuffer(body))
-	if response != nil {
-		defer response.Body.Close()
-	}
-	if err != nil {
-		return nil, err
-	}
+	headers := []KeyPair{{`Content-Type`, "application/json"}, {`User-Agents`, os.Getenv("USER_AGENTS")}}
 
-	data, err := ioutil.ReadAll(response.Body)
+	resp, err := Post(rpc.url, string(body), EmptyKeyPairList, headers)
 	if err != nil {
 		return nil, err
 	}
 
 	if rpc.Debug {
-		rpc.log.Println(fmt.Sprintf("%s\nRequest: %s\nResponse: %s\n", method, body, data))
+		rpc.log.Println(fmt.Sprintf("%s\nRequest: %s\nResponse: %s\n", method, body, resp))
 	}
 
-	resp := new(ethResponse)
-	if err := json.Unmarshal(data, resp); err != nil {
+	dataContainer := new(ethResponse)
+	if err := json.Unmarshal([]byte(resp), dataContainer); err != nil {
 		return nil, err
 	}
 
-	if resp.Error != nil {
-		return nil, *resp.Error
+	if dataContainer.Error != nil {
+		return nil, *dataContainer.Error
 	}
 
-	return resp.Result, nil
+	return dataContainer.Result, nil
 
 }
 

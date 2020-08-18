@@ -45,7 +45,7 @@ func (w *Web3) BalanceOf(address string) (balance big.Int, err error) {
 	return w.Rpc.EthGetBalance(address, "latest")
 }
 
-func (w *Web3) NonceOf(address string) (balance int, err error) {
+func (w *Web3) NonceOf(address string) (nonce int, err error) {
 	return w.Rpc.EthGetTransactionCount(address, "latest")
 }
 
@@ -147,10 +147,10 @@ func (w *Web3) GetRecipt(txHash string) (receipt *helper.TransactionReceipt, err
 
 // ============= Other Functions =============
 
-func GetGasPriceGwei() (gasPriceInGwei int64) {
+func GetGasPriceGwei() (gasPriceInGwei int64, err error) {
 	resp, err := helper.Get("https://ethgasstation.info/json/ethgasAPI.json", "", helper.EmptyKeyPairList, helper.EmptyKeyPairList)
 	if err != nil {
-		return 30 // default 30gwei
+		return
 	}
 	var dataContainer struct {
 		Fast    float64 `json:"fast"`
